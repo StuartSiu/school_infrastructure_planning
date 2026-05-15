@@ -1,0 +1,54 @@
+model school.mod;
+data school.dat;
+option solver gurobi;
+param Cost_Sec;
+param Cost_Ele;
+param Create_Sec;
+param Create_Ele;
+param Overcrowd_Sec;
+param Overcrowd_Ele;
+
+#display Bud;
+display alp,bet;
+solve;
+
+display W;
+display X;
+
+for {j in I}{
+	for {g in G}{
+		if Y[j,g] > 0
+			then display j,g;
+	}
+	for {i in I}{
+		if U[i,j] > 0
+			then display i,U[i,j];
+	}
+}
+
+for {l in K}{
+	for {h in H}{
+		if Z[l,h] > 0
+			then display l,h;
+	}
+	for {k in K}{
+		if V[k,l] > 0
+			then display k,V[k,l];
+	}
+}	
+	
+let Cost_Sec := sum {i in I} phi*W[i] + sum {j in I, g in G} the[g]*Y[j,g];	
+display Cost_Sec;
+let Cost_Ele := sum {k in K} lam*X[k]+ sum {l in K,h in H} psi[h]*Z[l,h];	
+display Cost_Ele;
+let Create_Sec := sum {i in I} (100*W[i]+sum {j in I} U[i,j]);
+display Create_Sec;
+let Create_Ele := sum {k in K} (100*X[k]+sum {l in K} V[k,l]);
+display Create_Ele;
+display sum {i in I} P[i]-Create_Sec;
+display sum {k in K} Q[k]-Create_Ele;
+let Overcrowd_Sec := (sum {i in I} P[i]-Create_Sec)/(sum {i in I} c[i]+Create_Sec);
+display Overcrowd_Sec;
+let Overcrowd_Ele := (sum {k in K} Q[k]-Create_Ele)/(sum {k in K} d[k]+Create_Ele);
+display Overcrowd_Ele;
+display _total_solve_elapsed_time;
